@@ -26,12 +26,13 @@ contract CanvasGen is ERC721, ERC721Burnable, ReentrancyGuard {
     error CoordinatesCantBeZero(uint32 x, uint32 y);
     error DurationCantBeZero(uint256 maxDurationBlocks);
     error CanvasAlreadyExistsTryAgain();
+    error ERC721InvalidToken();
 
     /*//////////////////////////////////////////////////////////////
                                  TYPES
     //////////////////////////////////////////////////////////////*/
     struct CanvasConfig {
-        uint32 x;
+        uint32 x; //this is x pixels but is indexed starting at 0
         uint32 y;
         uint256 startBlock;
         uint256 maxDurationBlocks;
@@ -150,7 +151,7 @@ contract CanvasGen is ERC721, ERC721Burnable, ReentrancyGuard {
                                ERC721 META
     //////////////////////////////////////////////////////////////*/
     function tokenURI(uint256 canvasId) public view override returns (string memory) {
-        require(_ownerOf(canvasId) != address(0), "ERC721: invalid token");
+        if (_ownerOf(canvasId) == address(0)) revert ERC721InvalidToken();
 
         CanvasConfig storage c = canvases[canvasId];
         string memory json = string(
