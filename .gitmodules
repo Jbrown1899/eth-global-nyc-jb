@@ -1,0 +1,6 @@
+[submodule "community-canvas/foundry/lib/openzeppelin-contracts"]
+	path = community-canvas/foundry/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "community-canvas/foundry/lib/forge-std"]
+	path = community-canvas/foundry/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
