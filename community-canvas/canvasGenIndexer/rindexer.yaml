@@ -1,0 +1,27 @@
+name: canvasGenIndexer
+project_type: no-code
+config: {}
+networks:
+- name: Base Sepolia
+  chain_id: 84532
+  rpc: https://sepolia.base.org
+storage:
+  postgres:
+    enabled: true
+  csv:
+    enabled: true
+    path: ./generated_csv
+native_transfers:
+  enabled: false
+contracts:
+- name: CanvasGen
+  details:
+  - network: Base Sepolia
+    address: 0xae78736cd615f374d3085123a210448e74fc6393
+    start_block: '29806540'
+    end_block:
+  abi: ./abis/CanvasGen.abi.json
+  include_events:
+  - CanvasGenerated
+  - PixelColored
+  - CanvasClaimed
