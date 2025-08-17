@@ -29,8 +29,8 @@ export default function CanvasGenForm({ /* contractAddress */ }: CanvasGenFormPr
     }, [chainId]);
 
     // State variables for the form inputs
-    const [x, setNftAddress] = useState<string>("");
-    const [y, setTokenId] = useState<string>("");
+    const [x, setX] = useState<string>("");
+    const [y, setY] = useState<string>("");
     const [maxDurationBlocks, setMaxDurationBlocks] = useState<string>("");
     
     // State to hold the transaction hash for waiting for the receipt
@@ -68,7 +68,7 @@ export default function CanvasGenForm({ /* contractAddress */ }: CanvasGenFormPr
                 abi: canvasGenAbi,
                 address: canvasGenAddress as `0x${string}`,
                 functionName: "generateCanvas",
-                args: [x as `0x${string}`, BigInt(y), BigInt(maxDurationBlocks)],
+                args: [parseInt(x), parseInt(y), BigInt(maxDurationBlocks)],
             });
             console.log("Canvas generation transaction submitted:", txHash);
             setTransactionHash(txHash); // Store the hash to track the transaction
@@ -126,19 +126,19 @@ export default function CanvasGenForm({ /* contractAddress */ }: CanvasGenFormPr
                 <div className="bg-white border border-zinc-300 rounded-lg p-4">
                     <h3 className="text-sm font-medium text-zinc-900 mb-3">Create a new canvas</h3>
 
-                    {/* Input fields for NFT details */}
+                    {/* Input fields for Canvas details */}
                     <div className="flex flex-col gap-3">
                         <InputForm
-                            label="NFT Address"
-                            placeholder="e.g., 0x123..."
+                            label="X dimension"
+                            placeholder="e.g., 100"
                             value={x}
-                            onChange={(e:any) => setNftAddress(e.target.value)}
+                            onChange={(e:any) => setX(e.target.value)}
                         />
                         <InputForm
-                            label="Token ID"
-                            placeholder="e.g., 1"
+                            label="Y dimension"
+                            placeholder="e.g., 100"
                             value={y}
-                            onChange={(e:any) => setTokenId(e.target.value)}
+                            onChange={(e:any) => setY(e.target.value)}
                         />
                         <InputForm
                             label="Max Duration Blocks"

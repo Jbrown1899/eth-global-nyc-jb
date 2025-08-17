@@ -8,6 +8,8 @@ import { baseSepolia } from "viem/chains";
 import Header from "@/components/Header";
 import Transaction from "@/components/Transaction";
 import UserBalance from "@/components/UserBalance";
+import PixelCanvas from "@/components/PixelCanvas";
+import GenerateCanvas from "@/components/GenerateCanvas";
 
 /**
  * Create a viem client to access user's balance on the Base Sepolia network
@@ -51,6 +53,12 @@ export default function SignedInScreen() {
         <div className="main-inner flex-col-container">
           <div className="card card--user-balance">
             <UserBalance balance={formattedBalance} />
+          </div>
+          <div className="card card--generate-canvas">
+            <GenerateCanvas />
+          </div>
+          <div className="card card--pixel-canvas">
+            <PixelCanvas />
           </div>
           <div className="card card--transaction">
             {isSignedIn && evmAddress && (

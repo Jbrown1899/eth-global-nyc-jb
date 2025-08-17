@@ -314,3 +314,24 @@ header .wallet-address {
     --cdp-base-font-size: 20px;
   }
 }
+
+/* Pixel Canvas Styles */
+.pixel {
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s ease;
+}
+
+.pixel:hover {
+  border-color: rgba(0, 0, 0, 0.3);
+  z-index: 1;
+}
+
+.canvas-container {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.pixel-grid {
+  gap: 0;
+}
