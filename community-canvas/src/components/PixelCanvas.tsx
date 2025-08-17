@@ -1,11 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useWriteContract, useWaitForTransactionReceipt, useChainId } from 'wagmi';
+import { useEvmAddress } from '@coinbase/cdp-hooks';
+import {
+  SendTransactionButton,
+  type SendTransactionButtonProps,
+} from "@coinbase/cdp-react/components/SendTransactionButton";
 import { chainsToContracts, canvasGenAbi } from '../utils/constants';
+import { encodeFunctionData } from "viem";
 // No need to import CgSpinner from react-icons/cg as we are creating a custom spinner.
 
 // The GraphQL endpoint URL. This should be replaced with your actual endpoint.
-const GRAPHQL_ENDPOINT = 'YOUR_GRAPHQL_ENDPOINT_HERE';
+const GRAPHQL_ENDPOINT = 'http://localhost:3001/graphql';
 
 // GraphQL query to get the canvas dimensions (X and Y)
 const GET_CANVAS_DIMENSIONS_QUERY = `
@@ -158,16 +163,16 @@ const Spinner = () => (
 export default function App() {
   const [canvasId, setCanvasId] = useState<string>("1"); // Default to canvas 1
   const [inputCanvasId, setInputCanvasId] = useState<string>("1"); // For the input field
-  const chainId = useChainId();
+  const { evmAddress } = useEvmAddress();
+  
+  // For now, hardcode to Anvil chain ID (31337) since we're using local development
+  const chainId = 84532;
   const canvasGenAddress = useMemo(() => {
     return (chainsToContracts[chainId]?.canvasGen) || null;
   }, [chainId]);
 
-  // Smart contract integration for setting pixels
-  const { writeContractAsync: writeSetPixelAsync } = useWriteContract();
-  const { isSuccess: isPixelSet } = useWaitForTransactionReceipt({
-    hash: undefined,
-  });
+  // State for transaction handling
+  const [isPixelSet, setIsPixelSet] = useState(false);
 
   // State for pixel popup
   const [selectedPixel, setSelectedPixel] = useState<{ x: number; y: number } | null>(null);
@@ -225,23 +230,35 @@ export default function App() {
     }
   };
 
-  // Handle setting a pixel via smart contract
-  const handleSetPixel = async (x: number, y: number, color: number) => {
+  // Create transaction for setting a pixel
+  const createSetPixelTransaction = (x: number, y: number, color: number) => {
     if (!canvasGenAddress) {
       console.error('No contract address available');
-      return;
+      return null;
     }
 
-    try {
-      await writeSetPixelAsync({
-        address: canvasGenAddress as `0x${string}`,
-        abi: canvasGenAbi,
-        functionName: 'setPixel',
-        args: [BigInt(canvasId), x, y, color],
-      });
-    } catch (error) {
-      console.error('Error setting pixel:', error);
-    }
+    // Encode the function call data
+    const functionData = encodeFunctionData({
+      abi: canvasGenAbi,
+      functionName: 'setPixel',
+      args: [BigInt(canvasId), x, y, color],
+    });
+
+    return {
+      to: canvasGenAddress as `0x${string}`,
+      data: functionData,
+      chainId: chainId, // Anvil chain ID
+      type: "eip1559" as const,
+    };
+  };
+
+  const handleTransactionError: SendTransactionButtonProps["onError"] = error => {
+    console.error('Error setting pixel:', error);
+  };
+
+  const handleTransactionSuccess: SendTransactionButtonProps["onSuccess"] = hash => {
+    console.log('Pixel set successfully:', hash);
+    setIsPixelSet(true);
   };
 
   // Handle pixel click to show popup
@@ -288,8 +305,8 @@ export default function App() {
   if (dimensionsError || pixelsError) {
     console.error("GraphQL Error:", dimensionsError || pixelsError);
     return (
-      <div className="p-8 text-red-500">
-        <p>Error loading canvas data. Please check the console for details.</p>
+      <div className="p-8 text-zinc-500">
+        <p>Currently no canvases found</p>
       </div>
     );
   }
@@ -297,8 +314,8 @@ export default function App() {
   // Handle case where no canvas is found
   if (!dimensions) {
     return (
-      <div className="p-8 text-red-500">
-        <p>No canvas found with the provided ID: {canvasId}</p>
+      <div className="p-8 text-zinc-500">
+        <p>Currently no canvases found</p>
       </div>
     );
   }
@@ -344,7 +361,14 @@ export default function App() {
           x={selectedPixel.x}
           y={selectedPixel.y}
           currentColor={pixelGrid[`${selectedPixel.x}-${selectedPixel.y}`] || "#ffffff"}
-          onSetPixel={handleSetPixel}
+          onSetPixel={(x, y, color) => {
+            const transaction = createSetPixelTransaction(x, y, color);
+            if (transaction && evmAddress) {
+              // For now, just log the transaction - you can implement the actual sending later
+              console.log('Transaction created:', transaction);
+              closePopup();
+            }
+          }}
           onClose={closePopup}
         />
       )}

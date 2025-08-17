@@ -2,6 +2,7 @@
 
 import { type Config } from "@coinbase/cdp-hooks";
 import { CDPReactProvider, type AppConfig } from "@coinbase/cdp-react/components/CDPReactProvider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { theme } from "@/components/theme";
 
@@ -27,9 +28,22 @@ const APP_CONFIG: AppConfig = {
  * @returns The wrapped children
  */
 export default function Providers({ children }: ProvidersProps) {
+  // Create a QueryClient instance
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 1,
+        refetchOnWindowFocus: false,
+        staleTime: 5 * 60 * 1000, // 5 minutes
+      },
+    },
+  });
+
   return (
-    <CDPReactProvider config={CDP_CONFIG} app={APP_CONFIG} theme={theme}>
-      {children}
-    </CDPReactProvider>
+    <QueryClientProvider client={queryClient}>
+      <CDPReactProvider config={CDP_CONFIG} app={APP_CONFIG} theme={theme}>
+        {children}
+      </CDPReactProvider>
+    </QueryClientProvider>
   );
 }

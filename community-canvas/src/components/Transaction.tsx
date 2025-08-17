@@ -35,7 +35,7 @@ export default function Transaction(props: Props) {
       to: evmAddress, // Send to yourself for testing
       value: 1000000000000n, // 0.000001 ETH in wei
       gas: 21000n,
-      chainId: 84532, // Base Sepolia
+      chainId: 84532, // Base Sepolia 84532 or anvil 31337
       type: "eip1559",
     };
   }, [evmAddress]);
@@ -84,7 +84,7 @@ export default function Transaction(props: Props) {
                   <p>Send 0.000001 ETH to yourself on Base Sepolia</p>
                   <SendTransactionButton
                     account={evmAddress}
-                    network="base-sepolia"
+                    network="base-sepolia" // base-sepolia or anvil
                     transaction={transaction}
                     onError={handleTransactionError}
                     onSuccess={handleTransactionSuccess}

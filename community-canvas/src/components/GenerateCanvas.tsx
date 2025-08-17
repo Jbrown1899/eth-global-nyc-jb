@@ -1,14 +1,14 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { RiSparkling2Line } from "react-icons/ri";
+import { useEvmAddress } from "@coinbase/cdp-hooks";
 import {
-    useChainId,
-    useWriteContract,
-    useAccount,
-    useWaitForTransactionReceipt,
-} from "wagmi";
+  SendTransactionButton,
+  type SendTransactionButtonProps,
+} from "@coinbase/cdp-react/components/SendTransactionButton";
 import { CgSpinner } from "react-icons/cg";
 import { chainsToContracts, canvasGenAbi } from "../utils/constants";
 import { InputForm } from "./ui/InputFormCanvasGen";
+import { encodeFunctionData } from "viem";
 
 // Interface for props if needed in the future
 interface CanvasGenFormProps {
@@ -17,14 +17,14 @@ interface CanvasGenFormProps {
 
 // Define the main component for generating the canvas
 export default function CanvasGenForm({ /* contractAddress */ }: CanvasGenFormProps) {
-    // Get the current user's address and the active chain ID
-    const { address } = useAccount();
-    const chainId = useChainId();
+    // Get the current user's address
+    const { evmAddress } = useEvmAddress();
+    
+    // For now, hardcode to Anvil chain ID (31337) since we're using local development
+    const chainId = 84532;
 
     // Determine the contract address dynamically based on the chain ID
     const canvasGenAddress = useMemo(() => {
-        // The type `0x${string}` is a TypeScript type, and cannot be used in the return statement.
-        // It's handled by wagmi hooks directly, so we can safely remove it here.
         return (chainsToContracts[chainId]?.canvasGen) || null;
     }, [chainId]);
 
@@ -33,86 +33,52 @@ export default function CanvasGenForm({ /* contractAddress */ }: CanvasGenFormPr
     const [y, setY] = useState<string>("");
     const [maxDurationBlocks, setMaxDurationBlocks] = useState<string>("");
     
-    // State to hold the transaction hash for waiting for the receipt
-    const [transactionHash, setTransactionHash] = useState<`0x${string}` | null>(null);
+    // State for transaction handling
+    const [transactionHash, setTransactionHash] = useState<string>("");
+    const [error, setError] = useState<string>("");
+    const [isGenerateConfirmed, setIsGenerateConfirmed] = useState(false);
 
-    // Use wagmi's useWriteContract hook to prepare the transaction
-    const {
-        data: generateCanvasHash,
-        isPending: isGeneratePending,
-        error: generateCanvasError,
-        writeContractAsync: writeGenerateCanvasAsync,
-    } = useWriteContract();
-
-    // Use wagmi's useWaitForTransactionReceipt to monitor the transaction
-    const {
-        isLoading: isGenerateConfirming,
-        isSuccess: isGenerateConfirmed,
-        isError: isGenerateError,
-    } = useWaitForTransactionReceipt({
-        confirmations: 1,
-        hash: generateCanvasHash,
-    });
-
-    // Handle the button click to generate the canvas
-    const handleGenerateCanvas = async () => {
-        // Ensure the contract address exists and inputs are valid
+    // Create transaction for canvas generation
+    const generateCanvasTransaction = useMemo(() => {
         if (!canvasGenAddress || !x || !y || !maxDurationBlocks) {
-            console.error("Missing contract address or input values.");
-            return;
+            return null;
         }
 
-        try {
-            // Call the generateCanvas function on the smart contract
-            const txHash = await writeGenerateCanvasAsync({
-                abi: canvasGenAbi,
-                address: canvasGenAddress as `0x${string}`,
-                functionName: "generateCanvas",
-                args: [parseInt(x), parseInt(y), BigInt(maxDurationBlocks)],
-            });
-            console.log("Canvas generation transaction submitted:", txHash);
-            setTransactionHash(txHash); // Store the hash to track the transaction
-        } catch (error) {
-            console.error("Error generating canvas:", error);
-        }
+        // Encode the function call data
+        const functionData = encodeFunctionData({
+            abi: canvasGenAbi,
+            functionName: "generateCanvas",
+            args: [parseInt(x), parseInt(y), BigInt(maxDurationBlocks)],
+        });
+
+        const transaction = {
+            to: canvasGenAddress as `0x${string}`,
+            data: functionData,
+            value: 0n, // No ETH being sent
+            gas: 500000n, // Estimate gas for contract interaction
+            chainId: chainId, 
+            type: "eip1559" as const,
+        };
+
+        console.log("Generated transaction:", transaction);
+        return transaction;
+    }, [canvasGenAddress, x, y, maxDurationBlocks]);
+
+    const handleTransactionError: SendTransactionButtonProps["onError"] = error => {
+        console.error("Transaction Error Details:", error);
+        setTransactionHash("");
+        setError(`Transaction failed: ${error.message}`);
+        setIsGenerateConfirmed(false);
+    };
+
+    const handleTransactionSuccess: SendTransactionButtonProps["onSuccess"] = hash => {
+        setTransactionHash(hash);
+        setError("");
+        setIsGenerateConfirmed(true);
     };
     
-    // Helper function to dynamically update the button content based on the state
-    function getButtonContent() {
-        if (isGeneratePending) {
-            return (
-                <div className="flex items-center justify-center gap-2 w-full">
-                    <CgSpinner className="animate-spin" size={20} />
-                    <span>Confirming in wallet...</span>
-                </div>
-            );
-        }
-        if (isGenerateConfirming) {
-            return (
-                <div className="flex items-center justify-center gap-2 w-full">
-                    <CgSpinner className="animate-spin" size={20} />
-                    <span>Generating your canvas...</span>
-                </div>
-            );
-        }
-        if (generateCanvasError || isGenerateError) {
-            console.error("Transaction Error:", generateCanvasError);
-            return (
-                <div className="flex items-center justify-center gap-2 w-full">
-                    <span>Error generating canvas, see console.</span>
-                </div>
-            );
-        }
-        if (isGenerateConfirmed) {
-            return "Canvas generated successfully!";
-        }
-        return (
-            <div className="flex items-center justify-center gap-2">
-                <RiSparkling2Line size={20} />
-                <span>Generate Canvas</span>
-            </div>
-        );
-    }
+    // Check if transaction is ready
+    const isTransactionReady = generateCanvasTransaction !== null && evmAddress;
 
     return (
         <div className="max-w-2xl min-w-full xl:min-w-lg w-full lg:mx-auto p-6 flex flex-col gap-6 bg-white rounded-xl ring-[4px] border-2 border-pink-500 ring-pink-500/25">
@@ -149,17 +115,30 @@ export default function CanvasGenForm({ /* contractAddress */ }: CanvasGenFormPr
                     </div>
 
                     {/* The main button to trigger the smart contract call */}
-                    <button
-                        className="mt-4 cursor-pointer flex items-center justify-center w-full py-3 rounded-[9px] text-white transition-colors font-semibold relative border bg-pink-500 hover:bg-pink-600 border-pink-500"
-                        onClick={handleGenerateCanvas}
-                        disabled={isGeneratePending || isGenerateConfirming}
-                    >
-                        {/* Gradient and inner shadow for styling */}
-                        <div className="absolute w-full inset-0 bg-gradient-to-b from-white/25 via-80% to-transparent mix-blend-overlay z-10 rounded-lg" />
-                        <div className="absolute w-full inset-0 mix-blend-overlay z-10 inner-shadow rounded-lg" />
-                        <div className="absolute w-full inset-0 mix-blend-overlay z-10 border-[1.5px] border-white/20 rounded-lg" />
-                        {getButtonContent()}
-                    </button>
+                    {isTransactionReady && generateCanvasTransaction && (
+                        <SendTransactionButton
+                            account={evmAddress}
+                            network="base-sepolia"
+                            transaction={generateCanvasTransaction}
+                            onError={handleTransactionError}
+                            onSuccess={handleTransactionSuccess}
+                            className="mt-4 cursor-pointer flex items-center justify-center w-full py-3 rounded-[9px] text-white transition-colors font-semibold relative border bg-pink-500 hover:bg-pink-600 border-pink-500"
+                        >
+                            <div className="flex items-center justify-center gap-2">
+                                <RiSparkling2Line size={20} />
+                                <span>Generate Canvas</span>
+                            </div>
+                        </SendTransactionButton>
+                    )}
+                    
+                    {!isTransactionReady && (
+                        <button
+                            className="mt-4 cursor-pointer flex items-center justify-center w-full py-3 rounded-[9px] text-white transition-colors font-semibold relative border bg-gray-400 border-gray-400"
+                            disabled
+                        >
+                            <span>Fill in all fields to generate canvas</span>
+                        </button>
+                    )}
 
                     {/* Display a success message after transaction confirmation */}
                     {isGenerateConfirmed && (

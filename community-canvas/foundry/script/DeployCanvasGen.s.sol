@@ -15,6 +15,10 @@ contract DeployCanvasGen is Script {
         vm.startBroadcast();
         CanvasGen canvasGen = new CanvasGen();
         vm.stopBroadcast();
+        
+        // Log the deployed contract address
+        console.log("CanvasGen deployed at:", address(canvasGen));
+        
         return canvasGen;
     }
 }

@@ -3,7 +3,7 @@
 import { useEvmAddress, useIsSignedIn } from "@coinbase/cdp-hooks";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createPublicClient, http, formatEther } from "viem";
-import { baseSepolia } from "viem/chains";
+import { baseSepolia, anvil } from "viem/chains";
 
 import Header from "@/components/Header";
 import Transaction from "@/components/Transaction";
@@ -15,7 +15,7 @@ import GenerateCanvas from "@/components/GenerateCanvas";
  * Create a viem client to access user's balance on the Base Sepolia network
  */
 const client = createPublicClient({
-  chain: baseSepolia,
+  chain: baseSepolia, // baseSepolia, anvil
   transport: http(),
 });
 
