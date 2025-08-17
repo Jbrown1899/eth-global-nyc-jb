@@ -12,7 +12,7 @@ contract CanvasGenTest is Test {
     address user2 = makeAddr("user2");
     address deployer = makeAddr("deployer");
 
-    event PixelColored(address indexed editor, uint256 indexed canvasId, uint32 indexed x, uint32 y, uint8 color);
+    event PixelColored(address indexed editor, uint256 indexed canvasId, uint32 indexed x, uint32 y, uint24 color);
     event CanvasGenerated(uint256 indexed canvasId, address indexed owner, CanvasConfig config);
     event CanvasClaimed(uint256 indexed canvasId, address indexed owner);
 
@@ -70,11 +70,11 @@ contract CanvasGenTest is Test {
         vm.prank(user2); // anyone can set pixel
         canvasGen.setPixel(id, 3, 3, 42);
 
-        uint8 color = canvasGen.getPixel(id, 3, 3);
+        uint24 color = canvasGen.getPixel(id, 3, 3);
         assertEq(color, 42);
 
         // default color check
-        uint8 defaultColor = canvasGen.getPixel(id, 0, 0);
+        uint24 defaultColor = canvasGen.getPixel(id, 0, 0);
         assertEq(defaultColor, 255); // DEFAULT_COLOR
     }
 
@@ -223,7 +223,7 @@ contract CanvasGenTest is Test {
         uint256 id = _createCanvas(user1);
 
         // Pixels not set should return DEFAULT_COLOR = 255
-        uint8 px = canvasGen.getPixel(id, 2, 2);
+        uint24 px = canvasGen.getPixel(id, 2, 2);
         assertEq(px, 255);
     }
 
@@ -233,7 +233,7 @@ contract CanvasGenTest is Test {
         // Set a pixel
         canvasGen.setPixel(id, 1, 1, 42);
 
-        uint8 px = canvasGen.getPixel(id, 1, 1);
+        uint24 px = canvasGen.getPixel(id, 1, 1);
         assertEq(px, 42);
     }
 

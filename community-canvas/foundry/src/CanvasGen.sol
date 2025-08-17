@@ -46,7 +46,7 @@ contract CanvasGen is ERC721, ERC721Burnable, ReentrancyGuard {
     /*//////////////////////////////////////////////////////////////
                                 EVENTS
     //////////////////////////////////////////////////////////////*/
-    event PixelColored(address indexed editor, uint256 indexed canvasId, uint32 indexed x, uint32 y, uint8 color);
+    event PixelColored(address indexed editor, uint256 indexed canvasId, uint32 indexed x, uint32 y, uint24 color);
     event CanvasGenerated(
         uint256 indexed canvasId, 
         address indexed owner, 
@@ -61,11 +61,11 @@ contract CanvasGen is ERC721, ERC721Burnable, ReentrancyGuard {
                             STATE VARIABLES
     //////////////////////////////////////////////////////////////*/
     mapping(uint256 => CanvasConfig) private canvases;
-    mapping(uint256 => mapping(uint32 => mapping(uint32 => uint8))) private color;      // canvasId -> x -> y -> color
+    mapping(uint256 => mapping(uint32 => mapping(uint32 => uint24))) private color;      // canvasId -> x -> y -> packed RGB color
     mapping(uint256 => mapping(uint32 => mapping(uint32 => bool))) private colorSet;    // whether pixel explicitly set
     uint256 private lastCanvasId = 1;
 
-    uint8 public constant DEFAULT_COLOR = 255; // white
+    uint24 public constant DEFAULT_COLOR = 0xFFFFFF; // white in RGB
 
     /*//////////////////////////////////////////////////////////////
                                MODIFIERS
@@ -115,7 +115,7 @@ contract CanvasGen is ERC721, ERC721Burnable, ReentrancyGuard {
         emit CanvasGenerated(canvasId, msg.sender, x, y, block.number, maxDurationBlocks);
     }
 
-    function setPixel(uint256 canvasId, uint32 x, uint32 y, uint8 newColor)
+    function setPixel(uint256 canvasId, uint32 x, uint32 y, uint24 newColor)
         external
         updateCompletion(canvasId)
     {
@@ -190,7 +190,7 @@ contract CanvasGen is ERC721, ERC721Burnable, ReentrancyGuard {
         return c;
     }
 
-    function getPixel(uint256 canvasId, uint32 x, uint32 y) external view returns (uint8) {
+    function getPixel(uint256 canvasId, uint32 x, uint32 y) external view returns (uint24) {
         CanvasConfig storage canvas = canvases[canvasId];
         if (canvas.owner == address(0)) revert UnknownCanvas(canvasId);
         if (x >= canvas.x || y >= canvas.y) revert CoordinatesOOB(x, y);

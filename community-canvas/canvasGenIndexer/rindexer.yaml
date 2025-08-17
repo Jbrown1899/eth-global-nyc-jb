@@ -18,7 +18,7 @@ contracts:
 - name: CanvasGen
   details:
   - network: base-sepolia # base-sepolia or anvil
-    address: 0xe6F06F32404d4022e862D183c959c8cC4C688648 # Base Sepolia 0xe6F06F32404d4022e862D183c959c8cC4C688648 or anvil TBD
+    address: 0x10fc0eE186489E8d73B8ecBB116063fAE6A01d3d # Base Sepolia 0xe6F06F32404d4022e862D183c959c8cC4C688648 or anvil TBD
     start_block: '29806540' # Base Sepolia 29806540 or anvil 0
     end_block:
   abi: ./abis/CanvasGen.abi.json

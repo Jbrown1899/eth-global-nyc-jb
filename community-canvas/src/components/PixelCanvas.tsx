@@ -95,7 +95,7 @@ interface PixelPopupProps {
 
 const PixelPopup: React.FC<PixelPopupProps> = ({ x, y, currentColor, canvasId, onSetPixel, onClose }) => {
   const [selectedColor, setSelectedColor] = useState<string>(currentColor);
-  const [colorComponent, setColorComponent] = useState<'red' | 'green' | 'blue' | 'grayscale'>('red');
+
   const [isSetting, setIsSetting] = useState(false);
   const [balance, setBalance] = useState<string>('0');
   const { evmAddress } = useEvmAddress();
@@ -129,33 +129,11 @@ const PixelPopup: React.FC<PixelPopupProps> = ({ x, y, currentColor, canvasId, o
 
   const handleSetPixel = async () => {
     setIsSetting(true);
-    // Convert hex color to uint8 (0-255)
+    // Convert hex color to uint24 (packed RGB)
     const colorNumber = parseInt(selectedColor.replace('#', ''), 16);
-    // Ensure it's clamped to 8-bit range (0-255)
-    const clampedColor = Math.max(0, Math.min(255, colorNumber));
-    await onSetPixel(x, y, clampedColor);
+    await onSetPixel(x, y, colorNumber);
     setIsSetting(false);
     onClose();
-  };
-
-  // Helper function to convert hex color to a single uint8 value
-  const hexToUint8 = (hexColor: string, component: 'red' | 'green' | 'blue' | 'grayscale'): number => {
-    // Remove the # if present
-    const hex = hexColor.replace('#', '');
-    
-    if (component === 'grayscale') {
-      // Convert to grayscale using luminance formula
-      const r = parseInt(hex.substring(0, 2), 16);
-      const g = parseInt(hex.substring(2, 4), 16);
-      const b = parseInt(hex.substring(4, 6), 16);
-      const gray = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
-      return Math.max(0, Math.min(255, gray));
-    } else {
-      // Extract the specific color component
-      const startIndex = component === 'red' ? 0 : component === 'green' ? 2 : 4;
-      const componentValue = parseInt(hex.substring(startIndex, startIndex + 2), 16);
-      return Math.max(0, Math.min(255, componentValue));
-    }
   };
 
   // Create transaction data for setPixel
@@ -184,8 +162,7 @@ const PixelPopup: React.FC<PixelPopupProps> = ({ x, y, currentColor, canvasId, o
     };
   };
 
-  const uint8Color = hexToUint8(selectedColor, colorComponent);
-  const transaction = createSetPixelTransaction(x, y, uint8Color);
+  const transaction = createSetPixelTransaction(x, y, parseInt(selectedColor.replace('#', ''), 16));
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -215,21 +192,8 @@ const PixelPopup: React.FC<PixelPopupProps> = ({ x, y, currentColor, canvasId, o
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Color Component:
-          </label>
-          <select
-            value={colorComponent}
-            onChange={(e) => setColorComponent(e.target.value as 'red' | 'green' | 'blue' | 'grayscale')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-          >
-            <option value="red">Red Component</option>
-            <option value="green">Green Component</option>
-            <option value="blue">Blue Component</option>
-            <option value="grayscale">Grayscale</option>
-          </select>
-          <p className="text-xs text-gray-500 mt-1">
-            Selected value: {uint8Color} (0-255)
+          <p className="text-xs text-gray-500">
+            RGB: {selectedColor}
           </p>
         </div>
         
@@ -453,7 +417,8 @@ export default function App() {
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const key = `${x}-${y}`;
-        const color = pixelGrid[key] || "transparent"; // Default to transparent if no color exists
+        const colorValue = pixelGrid[key];
+        const color = colorValue ? `#${parseInt(colorValue.toString()).toString(16).padStart(6, '0')}` : "transparent"; // Convert uint24 to hex
         const isSelected = selectedPixel && selectedPixel.x === x && selectedPixel.y === y;
         const isHovered = hoveredPixel && hoveredPixel.x === x && hoveredPixel.y === y;
         
