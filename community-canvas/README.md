@@ -1,3 +1,13 @@
+*Rindexer local commands*
+docker stop canvasgenindexer_postgresql_1
+docker rm canvasgenindexer_postgresql_1
+docker volume rm canvasgenindexer_postgres_data
+docker-compose up -d
+rindexer start all
+
+*FrontEnd Commands*
+pnpm dev
+
 # CDP React App
 
 This project was generated with [`@coinbase/create-cdp-app`](https://coinbase.github.io/cdp-web/modules/_coinbase_create-cdp-app.html) using the Next.js template.
