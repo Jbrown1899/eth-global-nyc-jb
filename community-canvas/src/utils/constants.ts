@@ -6,7 +6,7 @@ interface ContractsConfig {
 
 export const chainsToContracts: ContractsConfig = {
     84532: { // Base Sepolia 84532
-        canvasGen: "0xB5a575e77C0fcf57CDc24031144b1fa1534E487c"
+        canvasGen: "0xe6F06F32404d4022e862D183c959c8cC4C688648"
     },
     // 31337: { // Anvil chain ID
     //     canvasGen: "TBD"
