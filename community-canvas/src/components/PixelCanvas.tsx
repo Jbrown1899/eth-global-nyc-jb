@@ -17,8 +17,8 @@ const GET_CANVAS_DIMENSIONS_QUERY = `
   query GetCanvasDimensions($canvasId: String!) {
     allCanvasGenerateds(condition: { canvasId: $canvasId }) {
       nodes {
-        configX
-        configY
+        x
+        y
       }
     }
   }
@@ -185,8 +185,8 @@ export default function App() {
 
   // Extract dimensions from the fetched data
   const dimensions = dimensionsData?.data?.allCanvasGenerateds?.nodes[0];
-  const width = dimensions?.configX || 0;
-  const height = dimensions?.configY || 0;
+  const width = dimensions?.x || 0;
+  const height = dimensions?.y || 0;
 
   // --- Step 2: Fetch and update pixel data ---
   const { data: pixelData, isLoading: isLoadingPixels, error: pixelsError } = useGraphQLQuery(

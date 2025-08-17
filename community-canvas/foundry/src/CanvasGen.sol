@@ -47,7 +47,14 @@ contract CanvasGen is ERC721, ERC721Burnable, ReentrancyGuard {
                                 EVENTS
     //////////////////////////////////////////////////////////////*/
     event PixelColored(address indexed editor, uint256 indexed canvasId, uint32 indexed x, uint32 y, uint8 color);
-    event CanvasGenerated(uint256 indexed canvasId, address indexed owner, CanvasConfig config);
+    event CanvasGenerated(
+        uint256 indexed canvasId, 
+        address indexed owner, 
+        uint32 x, 
+        uint32 y, 
+        uint256 startBlock, 
+        uint256 maxDurationBlocks
+    );
     event CanvasClaimed(uint256 indexed canvasId, address indexed owner);
 
     /*//////////////////////////////////////////////////////////////
@@ -105,7 +112,7 @@ contract CanvasGen is ERC721, ERC721Burnable, ReentrancyGuard {
             imageCid: ""
         });
 
-        emit CanvasGenerated(canvasId, msg.sender, canvases[canvasId]);
+        emit CanvasGenerated(canvasId, msg.sender, x, y, block.number, maxDurationBlocks);
     }
 
     function setPixel(uint256 canvasId, uint32 x, uint32 y, uint8 newColor)

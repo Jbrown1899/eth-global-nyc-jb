@@ -556,57 +556,28 @@ export const canvasGenAbi = [
                     "internalType": "address"
                 },
                 {
-                    "name": "config",
-                    "type": "tuple",
+                    "name": "x",
+                    "type": "uint32",
                     "indexed": false,
-                    "internalType": "struct CanvasGen.CanvasConfig",
-                    "components": [
-                        {
-                            "name": "x",
-                            "type": "uint32",
-                            "internalType": "uint32"
-                        },
-                        {
-                            "name": "y",
-                            "type": "uint32",
-                            "internalType": "uint32"
-                        },
-                        {
-                            "name": "startBlock",
-                            "type": "uint256",
-                            "internalType": "uint256"
-                        },
-                        {
-                            "name": "maxDurationBlocks",
-                            "type": "uint256",
-                            "internalType": "uint256"
-                        },
-                        {
-                            "name": "isComplete",
-                            "type": "bool",
-                            "internalType": "bool"
-                        },
-                        {
-                            "name": "isClaimed",
-                            "type": "bool",
-                            "internalType": "bool"
-                        },
-                        {
-                            "name": "mostRecentUpdatedBlock",
-                            "type": "uint256",
-                            "internalType": "uint256"
-                        },
-                        {
-                            "name": "owner",
-                            "type": "address",
-                            "internalType": "address"
-                        },
-                        {
-                            "name": "imageCid",
-                            "type": "string",
-                            "internalType": "string"
-                        }
-                    ]
+                    "internalType": "uint32"
+                },
+                {
+                    "name": "y",
+                    "type": "uint32",
+                    "indexed": false,
+                    "internalType": "uint32"
+                },
+                {
+                    "name": "startBlock",
+                    "type": "uint256",
+                    "indexed": false,
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "maxDurationBlocks",
+                    "type": "uint256",
+                    "indexed": false,
+                    "internalType": "uint256"
                 }
             ],
             "anonymous": false
