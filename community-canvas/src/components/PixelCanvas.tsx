@@ -7,6 +7,7 @@ import {
 } from "@coinbase/cdp-react/components/SendTransactionButton";
 import { chainsToContracts, canvasGenAbi } from '../utils/constants';
 import { encodeFunctionData } from "viem";
+import ClaimCanvas from './ClaimCanvas';
 // No need to import CgSpinner from react-icons/cg as we are creating a custom spinner.
 
 // The GraphQL endpoint URL. This should be replaced with your actual endpoint.
@@ -323,6 +324,12 @@ export default function App() {
   const dimensions = dimensionsData?.data?.allCanvasGenerateds?.nodes[0];
   const width = dimensions?.x || 0;
   const height = dimensions?.y || 0;
+  
+  // For now, we'll use placeholder values for claim functionality
+  // These should be updated once the rindexer schema includes these fields
+  const isComplete = false; // TODO: Get from GraphQL when available
+  const isClaimed = false;  // TODO: Get from GraphQL when available
+  const owner = '';         // TODO: Get from GraphQL when available
 
   // --- Step 2: Fetch and update pixel data ---
   const { data: pixelData, isLoading: isLoadingPixels, error: pixelsError } = useGraphQLQuery(
@@ -330,32 +337,53 @@ export default function App() {
     { canvasId }
   );
 
+  // Debug GraphQL query state
+  useEffect(() => {
+    console.log('GraphQL query state for canvas', canvasId, ':', {
+      isLoading: isLoadingPixels,
+      hasData: !!pixelData,
+      error: pixelsError,
+      data: pixelData
+    });
+  }, [canvasId, isLoadingPixels, pixelData, pixelsError]);
+
   // State to hold the pixel grid data
-  const [pixelGrid, setPixelGrid] = useState<Record<string, string>>({});
+  const [pixelGrid, setPixelGrid] = useState<Record<string, number>>({});
 
   // Use a ref to track the latest block number to ensure we only get new pixels
   // This helps to avoid unnecessary state updates if no new pixels have been colored
   const lastKnownBlock = React.useRef(0);
 
+  // Effect to handle pixel grid updates and canvas changes
+  useEffect(() => {
+    console.log('Canvas ID changed to:', canvasId);
+    
+    // Clear UI state when canvas changes
+    setSelectedPixel(null);
+    setHoveredPixel(null);
+    lastKnownBlock.current = 0;
+    
+    // Clear pixel grid immediately when canvas changes
+    setPixelGrid({});
+  }, [canvasId]);
+
   // Effect to update the pixel grid whenever new pixel data arrives
   useEffect(() => {
+    console.log('Pixel data effect triggered for canvas', canvasId, 'with data:', pixelData);
     if (pixelData?.data?.allPixelColoreds?.nodes) {
       const newPixels = pixelData.data.allPixelColoreds.nodes;
+      console.log('Received pixel data from GraphQL for canvas', canvasId, ':', newPixels);
       
-      // Filter for pixels that are newer than the last known block
-      const latestBlockNumber = newPixels.reduce((max: number, p: any) => Math.max(max, parseInt(p.blockNumber)), 0);
-      
-      if (latestBlockNumber > lastKnownBlock.current) {
-        setPixelGrid(prevGrid => {
-          const updatedGrid = { ...prevGrid };
-          newPixels.forEach((pixel: any) => {
-            const key = `${pixel.x}-${pixel.y}`;
-            updatedGrid[key] = pixel.color;
-          });
-          return updatedGrid;
-        });
-        lastKnownBlock.current = latestBlockNumber;
-      }
+      // Reset the pixel grid for the new canvas
+      const updatedGrid: Record<string, number> = {};
+      newPixels.forEach((pixel: any) => {
+        const key = `${pixel.x}-${pixel.y}`;
+        updatedGrid[key] = pixel.color;
+        console.log(`Setting pixel ${key} to color ${pixel.color} (hex: ${pixel.color.toString(16).padStart(6, '0')})`);
+      });
+      console.log('Updated pixel grid for canvas', canvasId, ':', updatedGrid);
+      setPixelGrid(updatedGrid);
+      lastKnownBlock.current = newPixels.reduce((max: number, p: any) => Math.max(max, parseInt(p.blockNumber)), 0);
     }
   }, [pixelData]);
 
@@ -410,7 +438,7 @@ export default function App() {
   // Use memoization to avoid re-rendering the pixel list unless the grid changes
   const pixelList = useMemo(() => {
     const pixels = [];
-    console.log('Rendering pixels for grid:', { width, height });
+    console.log('Rendering pixels for grid:', { width, height, pixelGrid });
     
     // Fix orientation: iterate by y first (rows), then x (columns)
     // Flip Y-axis so (0,0) is at bottom-left
@@ -418,7 +446,12 @@ export default function App() {
       for (let x = 0; x < width; x++) {
         const key = `${x}-${y}`;
         const colorValue = pixelGrid[key];
-        const color = colorValue ? `#${parseInt(colorValue.toString()).toString(16).padStart(6, '0')}` : "transparent"; // Convert uint24 to hex
+        const color = colorValue ? colorValue.toString(16).padStart(6, '0') : null; // Convert uint24 to hex
+        
+        // Debug specific pixel
+        if (x === 4 && y === 9) {
+          console.log(`Debug pixel (4,9): colorValue=${colorValue}, color=${color}, flippedY=${height - 1 - y}`);
+        }
         const isSelected = selectedPixel && selectedPixel.x === x && selectedPixel.y === y;
         const isHovered = hoveredPixel && hoveredPixel.x === x && hoveredPixel.y === y;
         
@@ -436,7 +469,7 @@ export default function App() {
               isHovered ? 'ring-1 ring-blue-300 z-5' : ''
             }`}
             style={{ 
-              backgroundColor: color === "transparent" ? "rgba(255, 255, 255, 0.1)" : `#${color}`,
+              backgroundColor: color ? `#${color}` : "rgba(255, 255, 255, 0.1)",
               borderColor: showGrid ? 'rgba(0, 0, 0, 0.2)' : 'transparent',
               minWidth: '8px',
               minHeight: '8px',
@@ -446,7 +479,7 @@ export default function App() {
             onClick={() => handlePixelClick(x, y)}
             onMouseEnter={() => setHoveredPixel({ x, y })}
             onMouseLeave={() => setHoveredPixel(null)}
-            title={`Pixel (${x}, ${y}) - Color: ${color === "transparent" ? "transparent" : `#${color}`}`}
+            title={`Pixel (${x}, ${y}) - Color: ${color ? `#${color}` : "transparent"}`}
           />
         );
       }
@@ -546,7 +579,27 @@ export default function App() {
         <p className="text-red-500 text-sm mb-2">Error loading canvases: {allCanvasesError.message}</p>
       )}
       
-      <p className="text-zinc-600 mb-4">Viewing canvas ID: {canvasId}</p>
+      <p className="text-zinc-600 mb-4">
+        Viewing canvas ID: {canvasId} | 
+        Pixels loaded: {Object.keys(pixelGrid).length} | 
+        Dimensions: {width}×{height}
+      </p>
+      
+      {/* Claim Canvas Section */}
+      {canvasId && dimensions && (
+        <div className="w-full max-w-2xl mb-4">
+          <ClaimCanvas
+            canvasId={canvasId}
+            isComplete={isComplete}
+            isClaimed={isClaimed}
+            owner={owner}
+            onClaimSuccess={() => {
+              // Refresh the canvas data after successful claim
+              console.log('Canvas claimed successfully, refreshing data...');
+            }}
+          />
+        </div>
+      )}
       
       {/* Grid toggle */}
       <div className="flex items-center gap-2 mb-4">
@@ -577,7 +630,7 @@ export default function App() {
         <PixelPopup
           x={selectedPixel.x}
           y={selectedPixel.y}
-          currentColor={pixelGrid[`${selectedPixel.x}-${selectedPixel.y}`] || "#ffffff"}
+          currentColor={pixelGrid[`${selectedPixel.x}-${selectedPixel.y}`] ? `#${pixelGrid[`${selectedPixel.x}-${selectedPixel.y}`].toString(16).padStart(6, '0')}` : "#ffffff"}
           canvasId={canvasId}
           onSetPixel={(x, y, color) => {
             const transaction = createSetPixelTransaction(x, y, color);

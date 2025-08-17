@@ -6,7 +6,7 @@ interface ContractsConfig {
 
 export const chainsToContracts: ContractsConfig = {
     84532: { // Base Sepolia 84532
-        canvasGen: "0x10fc0eE186489E8d73B8ecBB116063fAE6A01d3d" // TODO: Update with new RGB-enabled contract address
+        canvasGen: "0x1c3f30eeE83A0C6A30B91dF7FeB038dEE8F27fc8" // TODO: Update with new RGB-enabled contract address
     },
     // 31337: { // Anvil chain ID
     //     canvasGen: "TBD"
@@ -535,6 +535,37 @@ export const canvasGenAbi = [
                 "type": "address",
                 "indexed": true,
                 "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "CanvasCompleted",
+        "inputs": [
+            {
+                "name": "canvasId",
+                "type": "uint256",
+                "indexed": true,
+                "internalType": "uint256"
+            },
+            {
+                "name": "owner",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "startBlock",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            },
+            {
+                "name": "mostRecentUpdatedBlock",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
             }
         ],
         "anonymous": false

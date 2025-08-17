@@ -56,6 +56,12 @@ contract CanvasGen is ERC721, ERC721Burnable, ReentrancyGuard {
         uint256 maxDurationBlocks
     );
     event CanvasClaimed(uint256 indexed canvasId, address indexed owner);
+    event CanvasCompleted(
+        uint256 indexed canvasId,
+        address indexed owner,
+        uint256 startBlock,
+        uint256 mostRecentUpdatedBlock
+    );
 
     /*//////////////////////////////////////////////////////////////
                             STATE VARIABLES
@@ -76,6 +82,7 @@ contract CanvasGen is ERC721, ERC721Burnable, ReentrancyGuard {
 
         if (!canvas.isComplete && block.number >= canvas.startBlock + canvas.maxDurationBlocks) {
             canvas.isComplete = true;
+            emit CanvasCompleted(canvasId, canvas.owner, canvas.startBlock, canvas.mostRecentUpdatedBlock);
         }
         _;
     }

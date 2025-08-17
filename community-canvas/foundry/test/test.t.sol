@@ -15,6 +15,7 @@ contract CanvasGenTest is Test {
     event PixelColored(address indexed editor, uint256 indexed canvasId, uint32 indexed x, uint32 y, uint24 color);
     event CanvasGenerated(uint256 indexed canvasId, address indexed owner, CanvasConfig config);
     event CanvasClaimed(uint256 indexed canvasId, address indexed owner);
+event CanvasCompleted(uint256 indexed canvasId, address indexed owner, uint256 startBlock, uint256 mostRecentUpdatedBlock);
 
     struct CanvasConfig {
         uint32 x; //this is x pixels but is indexed starting at 0
@@ -75,7 +76,7 @@ contract CanvasGenTest is Test {
 
         // default color check
         uint24 defaultColor = canvasGen.getPixel(id, 0, 0);
-        assertEq(defaultColor, 255); // DEFAULT_COLOR
+        assertEq(defaultColor, 0xFFFFFF); // DEFAULT_COLOR
     }
 
     function testSetPixelEmitsEvent() public {
@@ -224,7 +225,7 @@ contract CanvasGenTest is Test {
 
         // Pixels not set should return DEFAULT_COLOR = 255
         uint24 px = canvasGen.getPixel(id, 2, 2);
-        assertEq(px, 255);
+        assertEq(px, 0xFFFFFF);
     }
 
     function testGetPixelReturnsSetColor() public {

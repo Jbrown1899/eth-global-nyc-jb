@@ -370,3 +370,177 @@ header .wallet-address {
     linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
   background-size: 100% 100%;
 }
+
+/* Claim Canvas Styles */
+.claim-canvas-container {
+  background-color: var(--cdp-example-card-bg-color);
+  border: 1px solid var(--cdp-example-card-border-color);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.canvas-status {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-complete {
+  background-color: #10b981;
+  color: white;
+}
+
+.status-claimed {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.claim-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.claim-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+  text-align: center;
+}
+
+.claim-owner {
+  font-size: 0.875rem;
+  color: var(--cdp-example-text-secondary-color);
+  font-family: monospace;
+}
+
+.claim-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 150px;
+}
+
+.claim-button--enabled {
+  background-color: var(--cdp-example-accent-color);
+  color: var(--cdp-example-accent-foreground-color);
+}
+
+.claim-button--enabled:hover {
+  background-color: var(--cdp-example-accent-hover-color);
+  transform: translateY(-1px);
+}
+
+.claim-button--disabled {
+  background-color: var(--cdp-example-bg-low-contrast-color);
+  color: var(--cdp-example-text-secondary-color);
+  cursor: not-allowed;
+}
+
+.claim-button--secondary {
+  background-color: var(--cdp-example-bg-low-contrast-color);
+  color: var(--cdp-example-text-color);
+  border: 1px solid var(--cdp-example-card-border-color);
+}
+
+.claim-button--secondary:hover {
+  background-color: var(--cdp-example-card-border-color);
+}
+
+.claim-button--primary {
+  background-color: var(--cdp-example-accent-color);
+  color: var(--cdp-example-accent-foreground-color);
+}
+
+.claim-button--primary:hover {
+  background-color: var(--cdp-example-accent-hover-color);
+}
+
+.claim-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.claim-modal {
+  background-color: var(--cdp-example-card-bg-color);
+  border-radius: 1rem;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.claim-modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: var(--cdp-example-text-color);
+}
+
+.claim-modal-description {
+  color: var(--cdp-example-text-secondary-color);
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+}
+
+.claim-form {
+  margin-bottom: 1.5rem;
+}
+
+.claim-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--cdp-example-text-color);
+}
+
+.claim-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--cdp-example-card-border-color);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  background-color: var(--cdp-example-card-bg-color);
+  color: var(--cdp-example-text-color);
+}
+
+.claim-input:focus {
+  outline: none;
+  border-color: var(--cdp-example-accent-color);
+  box-shadow: 0 0 0 3px rgba(0, 173, 173, 0.1);
+}
+
+.claim-help {
+  font-size: 0.75rem;
+  color: var(--cdp-example-text-secondary-color);
+  margin: 0.5rem 0 0 0;
+}
+
+.claim-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
