@@ -57,13 +57,13 @@ export default function SignedInScreen() {
           <div className="card card--generate-canvas">
             <GenerateCanvas />
           </div>
-          <div className="card card--pixel-canvas">
-            <PixelCanvas />
-          </div>
           <div className="card card--transaction">
             {isSignedIn && evmAddress && (
               <Transaction balance={formattedBalance} onSuccess={getBalance} />
             )}
+          </div>
+          <div className="card card--pixel-canvas">
+            <PixelCanvas />
           </div>
         </div>
       </main>

@@ -5,6 +5,7 @@ networks:
 - name: base-sepolia # base-sepolia or anvil
   chain_id: 84532 # Base Sepolia 84532 or anvil 31337
   rpc: https://base-sepolia.g.alchemy.com/v2/SDoUMe6kwzXhdt8w3NLZL # Base Sepolia https://sepolia.base.org or anvil http://127.0.0.1:8545
+  block_poll_frequency: 2000 # Poll every 2000ms for the network
 storage:
   postgres:
     enabled: true

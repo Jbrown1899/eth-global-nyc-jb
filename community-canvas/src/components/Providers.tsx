@@ -15,7 +15,7 @@ const CDP_CONFIG: Config = {
 };
 
 const APP_CONFIG: AppConfig = {
-  name: "CDP Next.js StarterKit",
+  name: "Community Canvas",
   logoUrl: "http://localhost:3000/logo.svg",
   authMethods: ["email", "sms"],
 };
